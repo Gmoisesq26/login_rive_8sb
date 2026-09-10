@@ -11,6 +11,14 @@ class LoginScreenState extends State<LoginScreen> {
 //control para mostrar/ocultar contraseña
   bool _obscureText = true;
 
+//Creamos un cerebro de las animaciones de Rive
+  StateMachineController? _controller;
+  //SMI: State Machine Input
+  SMIBool? _isChecking;
+  SMIBool? _isHandsUp;
+  SMITrigger? _isTrigSuccess;
+  SMITrigger? _isTrigFail;
+
   @override
   Widget build(BuildContext context) {
     //Para obtener el tamaño de la pantalla
@@ -22,13 +30,48 @@ class LoginScreenState extends State<LoginScreen> {
         child: Column(
           children: [
             SizedBox(
-                height: 200,
-                width: size.width,
-                child: const RiveAnimation.asset('login_bear.riv')),
+              height: 200,
+              width: size.width,
+              child: RiveAnimation.asset(
+                'login_bear.riv',
+                stateMachines: ['Login Machine'],
+
+                //Al iniciar la  ainmacion
+                onInit: (artboard) {
+                  _controller = StateMachineController.fromArtboard(
+                    artboard,
+                    'Login Machine',
+                  );
+
+                  //verificamos que todo este bien
+                  if (_controller == null) return;
+
+                  //Agregamos el controlador al artboard
+                  artboard.addController(_controller!);
+
+                  //vinculamos las variables de la animacion con las variables de flutter
+                  _isChecking = _controller?.findSMI('isChecking');
+                  _isHandsUp = _controller?.findSMI('isHandsUp');
+                  _isTrigSuccess = _controller?.findSMI('trigSuccess');
+                  _isTrigFail = _controller?.findSMI('trigFail');
+                },
+              ),
+            ),
+
             //para separar los widgets
             const SizedBox(height: 10),
             //campo de texto para el email
             TextField(
+              onChanged: (value) {
+                if (_isHandsUp != null) {
+                  //No se tapa los ojos
+                  _isHandsUp!.change(false);
+                }
+                //si ischecking es nulo
+                if (_isChecking == null) return;
+                //activar
+                _isChecking!.change(true);
+              },
               //para mostrar un tipo de teclado
               keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
@@ -43,8 +86,18 @@ class LoginScreenState extends State<LoginScreen> {
 
             //para separar los widgets
             const SizedBox(height: 10),
-            //campo de texto para el email
+            //campo de texto para el password
             TextField(
+              onChanged: (value) {
+                if (_isHandsUp != null) {
+                  //No se tapa los ojos
+                  _isHandsUp!.change(true);
+                }
+                //si ischecking es nulo
+                if (_isChecking == null) return;
+                //activar
+                _isChecking!.change(false);
+              },
               //para mostrar un tipo de teclado.
               obscureText: _obscureText,
               decoration: InputDecoration(
