@@ -19,6 +19,29 @@ class LoginScreenState extends State<LoginScreen> {
   SMITrigger? _isTrigSuccess;
   SMITrigger? _isTrigFail;
 
+//1.1 Crear variables para focusNode
+  final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
+
+//1.2 Crear los listeners
+  @override
+  void initState() {
+    super.initState();
+    _emailFocusNode.addListener(() {
+      if (_emailFocusNode.hasFocus) {
+        //verifica que no sea nulo
+        if (_isHandsUp != null) {
+          //manos ariba en el email
+          _isHandsUp!.change(false);
+        }
+      }
+    });
+    _passwordFocusNode.addListener(() {
+      //Manos ariva en password
+      _isHandsUp?.change(_passwordFocusNode.hasFocus);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     //Para obtener el tamaño de la pantalla
@@ -33,7 +56,7 @@ class LoginScreenState extends State<LoginScreen> {
               height: 200,
               width: size.width,
               child: RiveAnimation.asset(
-                'login_bear.riv',
+                'assets/login_bear.riv',
                 stateMachines: ['Login Machine'],
 
                 //Al iniciar la  ainmacion
@@ -62,10 +85,12 @@ class LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 10),
             //campo de texto para el email
             TextField(
+              //1.3 Agregar focusNode al TextField
+              focusNode: _emailFocusNode,
               onChanged: (value) {
                 if (_isHandsUp != null) {
                   //No se tapa los ojos
-                  _isHandsUp!.change(false);
+                  //_isHandsUp!.change(false);
                 }
                 //si ischecking es nulo
                 if (_isChecking == null) return;
@@ -88,10 +113,12 @@ class LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 10),
             //campo de texto para el password
             TextField(
+              //1.3 Campo de texto para el password
+              focusNode: _passwordFocusNode,
               onChanged: (value) {
                 if (_isHandsUp != null) {
                   //No se tapa los ojos
-                  _isHandsUp!.change(true);
+                  //_isHandsUp!.change(true);
                 }
                 //si ischecking es nulo
                 if (_isChecking == null) return;
@@ -124,5 +151,13 @@ class LoginScreenState extends State<LoginScreen> {
         ),
       ),
     ));
+  }
+
+  @override
+  void dispose() {
+    //1.4 Liberar memoria de los focusNode(al salir de la pantalla)
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    super.dispose();
   }
 }
